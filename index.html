@@ -36,7 +36,10 @@
     firebase.database().ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
       if (data && data.play && audioEnabled) {
-        audio.play().catch((error) => {
+        audio.play().then(() => {
+          // Réinitialiser la valeur après lecture
+          firebase.database().ref("show").set({ play: false });
+        }).catch((error) => {
           console.error("Impossible de jouer le son :", error);
         });
       }
