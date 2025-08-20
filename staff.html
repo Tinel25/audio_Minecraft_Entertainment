@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contrôle du spectacle</title>
+</head>
+<body>
+  <h1>Staff : Lancer le spectacle 🎬</h1>
+  <button onclick="startShow()">Start</button>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    function startShow() {
+      firebase.database().ref("show").set({ start: true });
+    }
+  </script>
+</body>
+</html>
