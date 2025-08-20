@@ -1,26 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
+  <meta charset="UTF-8">
   <title>Spectacle Audio</title>
 </head>
 <body>
   <h1>Bienvenue au spectacle 🎧</h1>
-  <button onclick="enableAudio()">Activer le son</button>
-  <audio id="audio" src="spectacle.mp3"></audio>
+  <button id="enableBtn">Activer le son</button>
+  <audio id="audio" src="spectacle.mp3" preload="auto"></audio>
 
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
+
   <script>
     const audio = document.getElementById("audio");
+    const enableBtn = document.getElementById("enableBtn");
 
-    function enableAudio() {
-      audio.play();
-      audio.pause();
-    }
+    // Autoriser la lecture audio
+    enableBtn.addEventListener("click", () => {
+      audio.play().then(() => {
+        audio.pause(); // Prépare l'audio sans le jouer
+        enableBtn.disabled = true;
+        enableBtn.textContent = "Son activé ✅";
+      }).catch((error) => {
+        console.error("Erreur de lecture audio :", error);
+        alert("Veuillez autoriser le son dans votre navigateur.");
+      });
+    });
 
+    // Écoute du signal Firebase
     firebase.database().ref("show").on("value", (snapshot) => {
-      if (snapshot.val().start) {
+      const data = snapshot.val();
+      if (data && data.start) {
         audio.play();
       }
     });
