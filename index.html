@@ -35,7 +35,7 @@
     // Étape 2 : écouter Firebase et jouer le son si activé
     firebase.database().ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
-      if (data && data.start && audioEnabled) {
+      if (data && data.play && audioEnabled) {
         audio.play().catch((error) => {
           console.error("Impossible de jouer le son :", error);
         });
