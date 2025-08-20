@@ -10,13 +10,32 @@
   <!-- Firebase SDK compat -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="firebase-config.js"></script>
 
   <script>
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAibnn0YMMiEM0mJfOQRJ_8taGZ4IqgxR0",
+      authDomain: "audiominecraftentertainment.firebaseapp.com",
+      databaseURL: "https://audiominecraftentertainment-default-rtdb.firebaseio.com",
+      projectId: "audiominecraftentertainment",
+      storageBucket: "audiominecraftentertainment.firebasestorage.app",
+      messagingSenderId: "557660028873",
+      appId: "1:557660028873:web:29f9295c7f2bf0506fb218"
+    };
+
+    // Initialisation Firebase
+    firebase.initializeApp(firebaseConfig);
+
     function startShow() {
       const db = firebase.database();
-      db.ref("show").set({ play: true });
-      alert("Signal envoyé 🎉");
+      db.ref("show").set({ play: true })
+        .then(() => {
+          alert("Signal envoyé 🎉");
+        })
+        .catch((error) => {
+          console.error("Erreur d'envoi du signal :", error);
+          alert("Échec de l'envoi du signal.");
+        });
     }
   </script>
 </body>
