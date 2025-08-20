@@ -17,11 +17,13 @@
   <script>
     const audio = document.getElementById("audio");
     const enableBtn = document.getElementById("enableBtn");
+    let audioEnabled = false;
 
-    // Autoriser la lecture audio
+    // Étape 1 : autoriser la lecture audio
     enableBtn.addEventListener("click", () => {
       audio.play().then(() => {
         audio.pause(); // Prépare l'audio sans le jouer
+        audioEnabled = true;
         enableBtn.disabled = true;
         enableBtn.textContent = "Son activé ✅";
       }).catch((error) => {
@@ -30,11 +32,13 @@
       });
     });
 
-    // Écoute du signal Firebase
+    // Étape 2 : écouter Firebase et jouer le son si activé
     firebase.database().ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
-      if (data && data.start) {
-        audio.play();
+      if (data && data.start && audioEnabled) {
+        audio.play().catch((error) => {
+          console.error("Impossible de jouer le son :", error);
+        });
       }
     });
   </script>
