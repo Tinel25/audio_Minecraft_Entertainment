@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Spectacle Audio</title>
+</head>
+<body>
+  <h1>Bienvenue au spectacle 🎧</h1>
+  <button onclick="enableAudio()">Activer le son</button>
+  <audio id="audio" src="spectacle.mp3"></audio>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    const audio = document.getElementById("audio");
+
+    function enableAudio() {
+      audio.play();
+      audio.pause();
+    }
+
+    firebase.database().ref("show").on("value", (snapshot) => {
+      if (snapshot.val().start) {
+        audio.play();
+      }
+    });
+  </script>
+</body>
+</html>
