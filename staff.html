@@ -7,12 +7,16 @@
   <h1>Staff : Lancer le spectacle 🎬</h1>
   <button onclick="startShow()">Start</button>
 
+  <!-- Firebase SDK compat -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="firebase-config.js"></script>
+
   <script>
     function startShow() {
-      firebase.database().ref("show").set({ start: true });
+      const db = firebase.database();
+      db.ref("show").set({ play: true });
+      alert("Signal envoyé 🎉");
     }
   </script>
 </body>
