@@ -7,22 +7,30 @@
 <body>
   <h1>Bienvenue au spectacle 🎧</h1>
   <button id="enableBtn">Activer le son</button>
-  <audio id="audio" src="spectacle.mp3" preload="auto"></audio>
+  <audio id="audio" src="audio.mp3"></audio>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="firebase-config.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script>
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+
     const audio = document.getElementById("audio");
     const enableBtn = document.getElementById("enableBtn");
     let audioEnabled = false;
 
-    // Étape 1 : autoriser la lecture audio
     enableBtn.addEventListener("click", () => {
       audio.play().then(() => {
-        audio.pause(); // Prépare l'audio sans le jouer
+        audio.pause(); // Prépare le son
         audioEnabled = true;
         enableBtn.disabled = true;
         enableBtn.textContent = "Son activé ✅";
@@ -32,16 +40,18 @@
       });
     });
 
-    // Étape 2 : écouter Firebase et jouer le son si activé
     firebase.database().ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
       if (data && data.play && audioEnabled) {
-        audio.play().then(() => {
-          // Réinitialiser la valeur après lecture
-          firebase.database().ref("show").set({ play: false });
-        }).catch((error) => {
+        audio.play().catch((error) => {
           console.error("Impossible de jouer le son :", error);
         });
+
+        audio.onplaying = () => {
+          firebase.database().ref("show").set({ play: false }).catch((error) => {
+            console.error("Impossible de réinitialiser la valeur :", error);
+          });
+        };
       }
     });
   </script>
