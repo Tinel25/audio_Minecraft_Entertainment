@@ -3,6 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <title>Spectacle Audio</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url('logo.png'); /* Image de fond */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: sans-serif;
+      color: white;
+      text-align: center;
+    }
+
+    h1, button {
+      background-color: rgba(0, 0, 0, 0.6); /* Pour lisibilité sur fond */
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    button {
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
 </head>
 <body>
   <h1>Bienvenue au spectacle 🎧</h1>
@@ -38,7 +64,7 @@
     firebase.database().ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
       if (data && data.play && audioEnabled) {
-        audio.currentTime = 0; // Repart du début
+        audio.currentTime = 0;
         audio.play().then(() => {
           console.log("Son lancé !");
           setTimeout(() => {
