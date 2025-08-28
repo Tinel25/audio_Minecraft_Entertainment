@@ -4,24 +4,16 @@
   <meta charset="UTF-8">
   <title>Spectacle Audio</title>
   <style>
-    html, body {
+    body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      background-image: url('logo.PNG'); /* Image de fond */
+      background-image: url('logo.PNG');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
       background-attachment: fixed;
       font-family: sans-serif;
       color: white;
-    }
-
-    body {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
       text-align: center;
     }
 
@@ -29,11 +21,11 @@
       background-color: rgba(0, 0, 0, 0.6);
       padding: 10px 20px;
       border-radius: 8px;
-      margin-bottom: 20px;
+      margin-top: 40px;
       font-size: 24px;
     }
 
-    button {
+    #enableBtn {
       background-color: rgba(0, 0, 0, 0.6);
       padding: 10px 20px;
       border-radius: 8px;
@@ -41,10 +33,11 @@
       color: white;
       border: none;
       cursor: pointer;
+      margin-top: 150px; /* Décalage vertical important */
       transition: background-color 0.3s ease;
     }
 
-    button:hover {
+    #enableBtn:hover {
       background-color: rgba(0, 0, 0, 0.8);
     }
   </style>
@@ -57,7 +50,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script>
-    // Configuration Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAibnn0YMMiEM0mJfOQRJ_8taGZ4IqgxR0",
       authDomain: "audiominecraftentertainment.firebaseapp.com",
