@@ -107,6 +107,16 @@
       enableBtn.textContent = "Son activé ✅";
       alert("Le son est activé. Attendez le signal du staff.");
 
+      // Lecture anticipée silencieuse pour autoriser le navigateur
+      audio.volume = 0;
+      audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.volume = 1;
+      }).catch((error) => {
+        console.warn("Lecture anticipée refusée :", error);
+      });
+
       // Vérifie si le signal est déjà actif
       firebase.database().ref("show").once("value").then((snapshot) => {
         playAudioIfSignaled(snapshot.val());
