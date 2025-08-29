@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Spectacle Audio</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background-image: url('logo.PNG');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: sans-serif;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      margin-top: 80px;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 20px 30px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: rgba(255, 255, 255, 0.4);
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bienvenue au spectacle 🎧</h1>
+    <button id="enableBtn">Activer le son</button>
+    <div id="status">🎬 Spectacle en cours</div>
+  </div>
+
+  <audio id="audio" src="spectacle.mp3" preload="auto"></audio>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAibnn8YMMiEM0mJfOQRJ_8taGZ4IqbvXR0",
+      authDomain: "audiominecraftentertainment.firebaseapp.com",
+      projectId: "audiominecraftentertainment",
+      storageBucket: "audiominecraftentertainment.appspot.com",
+      messagingSenderId: "557660028873",
+      appId: "1:557660028873:web:29f9295cf72fb0f506fb218",
+      measurementId: "G-HFQ98YBQS8"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const audio = document.getElementById("audio");
+    const enableBtn = document.getElementById("enableBtn");
+    const status = document.getElementById("status");
+    let audioEnabled = false;
+    let pendingStartTime = null;
+
+    // Envoie automatique de la durée audio
+    audio.addEventListener("loadedmetadata", () => {
+      const duration = Math.floor(audio.duration);
+      firebase.database().ref("audioInfo").set({ duration });
+      console.log("Durée audio envoyée :", duration, "secondes");
+    });
+
+    function playFromTimestamp(startTime) {
+      const now = Date.now();
+      const elapsedSec = (now - startTime) / 1000;
+
+      function launchAudio() {
+        if (elapsedSec < audio.duration) {
+          audio.currentTime = elapsedSec;
+          audio.play().then(() => {
+            status.style.display = "block";
+            console.log("Son lancé à", elapsedSec.toFixed(2), "secondes");
+          }).catch((error) => {
+            console.error("Impossible de jouer le son :", error);
+          });
+        }
+      }
+
+      if (isNaN(audio.duration)) {
+        audio.addEventListener("loadedmetadata", launchAudio, { once: true });
+      } else {
+        launchAudio();
+      }
+    }
+
+    enableBtn.addEventListener("click", () => {
+      audioEnabled = true;
+      enableBtn.disabled = true;
+      enableBtn.textContent = "Son activé ✅";
+      alert("Le son est activé. Attendez le signal du staff.");
+
+      // Lecture silencieuse pour autoriser le navigateur
+      audio.volume = 0;
+      audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.volume = 1;
+
+        if (pendingStartTime) {
+          playFromTimestamp(pendingStartTime);
+        }
+      }).catch((error) => {
+        console.warn("Lecture anticipée refusée :", error);
+      });
+    });
+
+    firebase.database().ref("show").on("value", (snapshot) => {
+      const data = snapshot.val();
+
+      if (data && data.startTime) {
+        pendingStartTime = data.startTime;
+        if (audioEnabled) {
+          playFromTimestamp(data.startTime);
+        }
+      } else {
+        audio.pause();
+        status.style.display = "none";
+        console.log("Spectacle interrompu par le staff");
+      }
+    });
+  </script>
+</body>
+</html>
