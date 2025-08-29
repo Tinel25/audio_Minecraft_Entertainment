@@ -35,7 +35,6 @@
   <button onclick="resetShow()">🛑 Réinitialiser</button>
   <div id="progress">⏳ En attente du lancement...</div>
 
-  <!-- Firebase SDK compat -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
@@ -54,8 +53,7 @@
     const db = firebase.database();
     const progressDiv = document.getElementById("progress");
     let intervalId = null;
-
-    const audioDuration = 180; // durée du fichier audio en secondes
+    let audioDuration = 180; // valeur par défaut
 
     function startShow() {
       const timestamp = Date.now();
@@ -98,6 +96,15 @@
         }
       }, 1000);
     }
+
+    // Récupère la durée audio automatiquement
+    db.ref("audioInfo/duration").on("value", (snapshot) => {
+      const duration = snapshot.val();
+      if (duration && !isNaN(duration)) {
+        audioDuration = duration;
+        console.log("Durée audio reçue :", audioDuration, "secondes");
+      }
+    });
 
     db.ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
