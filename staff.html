@@ -89,7 +89,13 @@
         const now = Date.now();
         const elapsed = Math.floor((now - startTime) / 1000);
         const percent = Math.min(100, Math.floor((elapsed / audioDuration) * 100));
-        progressDiv.textContent = `🎶 ${elapsed}s écoulées — ${percent}% du spectacle`;
+
+        if (elapsed >= audioDuration) {
+          clearInterval(intervalId);
+          progressDiv.textContent = `✅ Spectacle terminé — 100%`;
+        } else {
+          progressDiv.textContent = `🎶 ${elapsed}s écoulées — ${percent}% du spectacle`;
+        }
       }, 1000);
     }
 
