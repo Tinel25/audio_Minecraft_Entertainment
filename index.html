@@ -83,18 +83,17 @@
     const enableBtn = document.getElementById("enableBtn");
     const status = document.getElementById("status");
     let audioEnabled = false;
+    let signalReceived = false;
 
-    function playAudioIfSignaled(data) {
-      if (data && data.play && audioEnabled) {
+    function tryPlayAudio() {
+      if (audioEnabled && signalReceived) {
         audio.currentTime = 0;
         audio.play().then(() => {
           console.log("Son lancé !");
           status.style.display = "block";
-          setTimeout(() => {
-            firebase.database().ref("show").set({ play: false }).catch((error) => {
-              console.error("Impossible de réinitialiser la valeur :", error);
-            });
-          }, 1000);
+          firebase.database().ref("show").set({ play: false }).catch((error) => {
+            console.error("Impossible de réinitialiser la valeur :", error);
+          });
         }).catch((error) => {
           console.error("Impossible de jouer le son :", error);
         });
@@ -107,24 +106,22 @@
       enableBtn.textContent = "Son activé ✅";
       alert("Le son est activé. Attendez le signal du staff.");
 
-      // Lecture anticipée silencieuse pour autoriser le navigateur
+      // Lecture silencieuse pour autoriser le navigateur
       audio.volume = 0;
       audio.play().then(() => {
         audio.pause();
         audio.currentTime = 0;
         audio.volume = 1;
+        tryPlayAudio(); // au cas où le signal est déjà arrivé
       }).catch((error) => {
         console.warn("Lecture anticipée refusée :", error);
-      });
-
-      // Vérifie si le signal est déjà actif
-      firebase.database().ref("show").once("value").then((snapshot) => {
-        playAudioIfSignaled(snapshot.val());
       });
     });
 
     firebase.database().ref("show").on("value", (snapshot) => {
-      playAudioIfSignaled(snapshot.val());
+      const data = snapshot.val();
+      signalReceived = data && data.play;
+      tryPlayAudio();
     });
   </script>
 </body>
