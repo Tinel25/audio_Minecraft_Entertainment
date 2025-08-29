@@ -108,15 +108,22 @@
         const elapsedMs = now - data.startTime;
         const elapsedSec = elapsedMs / 1000;
 
-        // Si le spectacle est en cours
-        if (elapsedSec < audio.duration) {
-          audio.currentTime = elapsedSec;
-          audio.play().then(() => {
-            status.style.display = "block";
-            console.log("Son lancé à", elapsedSec.toFixed(2), "secondes");
-          }).catch((error) => {
-            console.error("Impossible de jouer le son :", error);
-          });
+        function launchAudio() {
+          if (elapsedSec < audio.duration) {
+            audio.currentTime = elapsedSec;
+            audio.play().then(() => {
+              status.style.display = "block";
+              console.log("Son lancé à", elapsedSec.toFixed(2), "secondes");
+            }).catch((error) => {
+              console.error("Impossible de jouer le son :", error);
+            });
+          }
+        }
+
+        if (isNaN(audio.duration)) {
+          audio.addEventListener("loadedmetadata", launchAudio, { once: true });
+        } else {
+          launchAudio();
         }
       }
     });
