@@ -2,17 +2,44 @@
 <html>
 <head>
   <title>Contrôle du spectacle</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #111;
+      color: white;
+      text-align: center;
+      padding-top: 50px;
+    }
+    button {
+      margin: 10px;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background-color: #444;
+      color: white;
+    }
+    button:hover {
+      background-color: #666;
+    }
+    #progress {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Staff : Lancer le spectacle 🎬</h1>
-  <button onclick="startShow()">Start</button>
+  <h1>Staff : Contrôle du spectacle 🎬</h1>
+  <button onclick="startShow()">🎧 Lancer le spectacle</button>
+  <button onclick="resetShow()">🛑 Réinitialiser</button>
+  <div id="progress">⏳ En attente du lancement...</div>
 
   <!-- Firebase SDK compat -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <script>
-    // Configuration Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyAibnn8YMMiEM0mJfOQRJ_8taGZ4IqbvXR0",
       authDomain: "audiominecraftentertainment.firebaseapp.com",
@@ -23,21 +50,56 @@
       measurementId: "G-HFQ98YBQS8"
     };
 
-    // Initialisation Firebase
     firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const progressDiv = document.getElementById("progress");
+    let intervalId = null;
 
     function startShow() {
-      const db = firebase.database();
-      const timestamp = Date.now(); // Horodatage réel
+      const timestamp = Date.now();
       db.ref("show").set({ startTime: timestamp })
         .then(() => {
-          alert("Signal envoyé 🎉 à " + new Date(timestamp).toLocaleTimeString());
+          alert("Signal envoyé 🎉");
+          updateProgress(timestamp);
         })
         .catch((error) => {
           console.error("Erreur d'envoi du signal :", error);
           alert("Échec de l'envoi du signal.");
         });
     }
+
+    function resetShow() {
+      db.ref("show").set({})
+        .then(() => {
+          alert("Spectacle réinitialisé 🧹");
+          progressDiv.textContent = "⏳ En attente du lancement...";
+          clearInterval(intervalId);
+        })
+        .catch((error) => {
+          console.error("Erreur de réinitialisation :", error);
+          alert("Échec de la réinitialisation.");
+        });
+    }
+
+    function updateProgress(startTime) {
+      clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        const now = Date.now();
+        const elapsed = Math.floor((now - startTime) / 1000);
+        progressDiv.textContent = `🎶 Spectacle en cours : ${elapsed} secondes écoulées`;
+      }, 1000);
+    }
+
+    // Affichage automatique si le spectacle est déjà lancé
+    db.ref("show").on("value", (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.startTime) {
+        updateProgress(data.startTime);
+      } else {
+        progressDiv.textContent = "⏳ En attente du lancement...";
+        clearInterval(intervalId);
+      }
+    });
   </script>
 </body>
 </html>
