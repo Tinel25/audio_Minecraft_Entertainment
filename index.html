@@ -85,6 +85,13 @@
     let audioEnabled = false;
     let pendingStartTime = null;
 
+    // Envoie automatique de la durée audio
+    audio.addEventListener("loadedmetadata", () => {
+      const duration = Math.floor(audio.duration);
+      firebase.database().ref("audioInfo").set({ duration });
+      console.log("Durée audio envoyée :", duration, "secondes");
+    });
+
     function playFromTimestamp(startTime) {
       const now = Date.now();
       const elapsedSec = (now - startTime) / 1000;
@@ -121,7 +128,6 @@
         audio.currentTime = 0;
         audio.volume = 1;
 
-        // Si le signal est déjà arrivé, on joue maintenant
         if (pendingStartTime) {
           playFromTimestamp(pendingStartTime);
         }
@@ -139,7 +145,6 @@
           playFromTimestamp(data.startTime);
         }
       } else {
-        // Signal supprimé → on arrête le son
         audio.pause();
         status.style.display = "none";
         console.log("Spectacle interrompu par le staff");
