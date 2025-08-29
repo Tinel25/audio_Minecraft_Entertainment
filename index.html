@@ -83,6 +83,30 @@
     const enableBtn = document.getElementById("enableBtn");
     const status = document.getElementById("status");
     let audioEnabled = false;
+    let pendingStartTime = null;
+
+    function playFromTimestamp(startTime) {
+      const now = Date.now();
+      const elapsedSec = (now - startTime) / 1000;
+
+      function launchAudio() {
+        if (elapsedSec < audio.duration) {
+          audio.currentTime = elapsedSec;
+          audio.play().then(() => {
+            status.style.display = "block";
+            console.log("Son lancé à", elapsedSec.toFixed(2), "secondes");
+          }).catch((error) => {
+            console.error("Impossible de jouer le son :", error);
+          });
+        }
+      }
+
+      if (isNaN(audio.duration)) {
+        audio.addEventListener("loadedmetadata", launchAudio, { once: true });
+      } else {
+        launchAudio();
+      }
+    }
 
     enableBtn.addEventListener("click", () => {
       audioEnabled = true;
@@ -96,6 +120,11 @@
         audio.pause();
         audio.currentTime = 0;
         audio.volume = 1;
+
+        // Si le signal est déjà arrivé, on joue maintenant
+        if (pendingStartTime) {
+          playFromTimestamp(pendingStartTime);
+        }
       }).catch((error) => {
         console.warn("Lecture anticipée refusée :", error);
       });
@@ -103,27 +132,10 @@
 
     firebase.database().ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
-      if (data && data.startTime && audioEnabled) {
-        const now = Date.now();
-        const elapsedMs = now - data.startTime;
-        const elapsedSec = elapsedMs / 1000;
-
-        function launchAudio() {
-          if (elapsedSec < audio.duration) {
-            audio.currentTime = elapsedSec;
-            audio.play().then(() => {
-              status.style.display = "block";
-              console.log("Son lancé à", elapsedSec.toFixed(2), "secondes");
-            }).catch((error) => {
-              console.error("Impossible de jouer le son :", error);
-            });
-          }
-        }
-
-        if (isNaN(audio.duration)) {
-          audio.addEventListener("loadedmetadata", launchAudio, { once: true });
-        } else {
-          launchAudio();
+      if (data && data.startTime) {
+        pendingStartTime = data.startTime;
+        if (audioEnabled) {
+          playFromTimestamp(data.startTime);
         }
       }
     });
