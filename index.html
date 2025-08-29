@@ -68,15 +68,15 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   <script>
-   const firebaseConfig = {
-  apiKey: "AIzaSyAibnn8YMMiEM0mJfOQRJ_8taGZ4IqbvXR0",
-  authDomain: "audiominecraftentertainment.firebaseapp.com",
-  projectId: "audiominecraftentertainment",
-  storageBucket: "audiominecraftentertainment.appspot.com",
-  messagingSenderId: "557660028873",
-  appId: "1:557660028873:web:29f9295cf72fb0f506fb218",
-  measurementId: "G-HFQ98YBQS8"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyAibnn8YMMiEM0mJfOQRJ_8taGZ4IqbvXR0",
+      authDomain: "audiominecraftentertainment.firebaseapp.com",
+      projectId: "audiominecraftentertainment",
+      storageBucket: "audiominecraftentertainment.appspot.com",
+      messagingSenderId: "557660028873",
+      appId: "1:557660028873:web:29f9295cf72fb0f506fb218",
+      measurementId: "G-HFQ98YBQS8"
+    };
     firebase.initializeApp(firebaseConfig);
 
     const audio = document.getElementById("audio");
@@ -91,9 +91,11 @@
         audio.play().then(() => {
           console.log("Son lancé !");
           status.style.display = "block";
-          firebase.database().ref("show").set({ play: false }).catch((error) => {
-            console.error("Impossible de réinitialiser la valeur :", error);
-          });
+          setTimeout(() => {
+            firebase.database().ref("show").set({ play: false }).catch((error) => {
+              console.error("Impossible de réinitialiser la valeur :", error);
+            });
+          }, 10000); // ← délai augmenté à 10 secondes
         }).catch((error) => {
           console.error("Impossible de jouer le son :", error);
         });
@@ -126,4 +128,3 @@
   </script>
 </body>
 </html>
-
