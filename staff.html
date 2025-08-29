@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contrôle du spectacle</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #111;
+      color: white;
+      text-align: center;
+      padding-top: 50px;
+    }
+    button {
+      margin: 10px;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background-color: #444;
+      color: white;
+    }
+    button:hover {
+      background-color: #666;
+    }
+    #progress {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Staff : Contrôle du spectacle 🎬</h1>
+  <button onclick="startShow()">🎧 Lancer le spectacle</button>
+  <button onclick="resetShow()">🛑 Réinitialiser</button>
+  <div id="progress">⏳ En attente du lancement...</div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAibnn8YMMiEM0mJfOQRJ_8taGZ4IqbvXR0",
+      authDomain: "audiominecraftentertainment.firebaseapp.com",
+      projectId: "audiominecraftentertainment",
+      storageBucket: "audiominecraftentertainment.appspot.com",
+      messagingSenderId: "557660028873",
+      appId: "1:557660028873:web:29f9295cf72fb0f506fb218",
+      measurementId: "G-HFQ98YBQS8"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const progressDiv = document.getElementById("progress");
+    let intervalId = null;
+    let audioDuration = 180; // valeur par défaut
+
+    function startShow() {
+      const timestamp = Date.now();
+      db.ref("show").set({ startTime: timestamp })
+        .then(() => {
+          alert("Signal envoyé 🎉");
+          updateProgress(timestamp);
+        })
+        .catch((error) => {
+          console.error("Erreur d'envoi du signal :", error);
+          alert("Échec de l'envoi du signal.");
+        });
+    }
+
+    function resetShow() {
+      db.ref("show").set({})
+        .then(() => {
+          alert("Spectacle réinitialisé 🧹");
+          progressDiv.textContent = "⏳ En attente du lancement...";
+          clearInterval(intervalId);
+        })
+        .catch((error) => {
+          console.error("Erreur de réinitialisation :", error);
+          alert("Échec de la réinitialisation.");
+        });
+    }
+
+    function updateProgress(startTime) {
+      clearInterval(intervalId);
+      intervalId = setInterval(() => {
+        const now = Date.now();
+        const elapsed = Math.floor((now - startTime) / 1000);
+        const percent = Math.min(100, Math.floor((elapsed / audioDuration) * 100));
+
+        if (elapsed >= audioDuration) {
+          clearInterval(intervalId);
+          progressDiv.textContent = `✅ Spectacle terminé — 100%`;
+        } else {
+          progressDiv.textContent = `🎶 ${elapsed}s écoulées — ${percent}% du spectacle`;
+        }
+      }, 1000);
+    }
+
+    // Récupère la durée audio automatiquement
+    db.ref("audioInfo/duration").on("value", (snapshot) => {
+      const duration = snapshot.val();
+      if (duration && !isNaN(duration)) {
+        audioDuration = duration;
+        console.log("Durée audio reçue :", audioDuration, "secondes");
+      }
+    });
+
+    db.ref("show").on("value", (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.startTime) {
+        updateProgress(data.startTime);
+      } else {
+        progressDiv.textContent = "⏳ En attente du lancement...";
+        clearInterval(intervalId);
+      }
+    });
+  </script>
+</body>
+</html>
