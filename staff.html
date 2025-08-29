@@ -55,6 +55,8 @@
     const progressDiv = document.getElementById("progress");
     let intervalId = null;
 
+    const audioDuration = 180; // durée du fichier audio en secondes
+
     function startShow() {
       const timestamp = Date.now();
       db.ref("show").set({ startTime: timestamp })
@@ -86,11 +88,11 @@
       intervalId = setInterval(() => {
         const now = Date.now();
         const elapsed = Math.floor((now - startTime) / 1000);
-        progressDiv.textContent = `🎶 Spectacle en cours : ${elapsed} secondes écoulées`;
+        const percent = Math.min(100, Math.floor((elapsed / audioDuration) * 100));
+        progressDiv.textContent = `🎶 ${elapsed}s écoulées — ${percent}% du spectacle`;
       }, 1000);
     }
 
-    // Affichage automatique si le spectacle est déjà lancé
     db.ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
       if (data && data.startTime) {
