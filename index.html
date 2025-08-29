@@ -132,11 +132,17 @@
 
     firebase.database().ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
+
       if (data && data.startTime) {
         pendingStartTime = data.startTime;
         if (audioEnabled) {
           playFromTimestamp(data.startTime);
         }
+      } else {
+        // Signal supprimé → on arrête le son
+        audio.pause();
+        status.style.display = "none";
+        console.log("Spectacle interrompu par le staff");
       }
     });
   </script>
