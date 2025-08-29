@@ -28,10 +28,10 @@
 
     function startShow() {
       const db = firebase.database();
-      const timestamp = Date.now(); // Horodatage en millisecondes
+      const timestamp = Date.now(); // Horodatage réel
       db.ref("show").set({ startTime: timestamp })
         .then(() => {
-          alert("Signal envoyé 🎉");
+          alert("Signal envoyé 🎉 à " + new Date(timestamp).toLocaleTimeString());
         })
         .catch((error) => {
           console.error("Erreur d'envoi du signal :", error);
