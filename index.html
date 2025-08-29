@@ -83,24 +83,6 @@
     const enableBtn = document.getElementById("enableBtn");
     const status = document.getElementById("status");
     let audioEnabled = false;
-    let signalReceived = false;
-
-    function tryPlayAudio() {
-      if (audioEnabled && signalReceived) {
-        audio.currentTime = 0;
-        audio.play().then(() => {
-          console.log("Son lancé !");
-          status.style.display = "block";
-          setTimeout(() => {
-            firebase.database().ref("show").set({ play: false }).catch((error) => {
-              console.error("Impossible de réinitialiser la valeur :", error);
-            });
-          }, 10000); // ← délai augmenté à 10 secondes
-        }).catch((error) => {
-          console.error("Impossible de jouer le son :", error);
-        });
-      }
-    }
 
     enableBtn.addEventListener("click", () => {
       audioEnabled = true;
@@ -114,7 +96,6 @@
         audio.pause();
         audio.currentTime = 0;
         audio.volume = 1;
-        tryPlayAudio(); // au cas où le signal est déjà arrivé
       }).catch((error) => {
         console.warn("Lecture anticipée refusée :", error);
       });
@@ -122,8 +103,22 @@
 
     firebase.database().ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
-      signalReceived = data && data.play;
-      tryPlayAudio();
+      if (data && data.startTime && audioEnabled) {
+        const now = Date.now();
+        const elapsedMs = now - data.startTime;
+        const elapsedSec = elapsedMs / 1000;
+
+        // Si le spectacle est en cours
+        if (elapsedSec < audio.duration) {
+          audio.currentTime = elapsedSec;
+          audio.play().then(() => {
+            status.style.display = "block";
+            console.log("Son lancé à", elapsedSec.toFixed(2), "secondes");
+          }).catch((error) => {
+            console.error("Impossible de jouer le son :", error);
+          });
+        }
+      }
     });
   </script>
 </body>
