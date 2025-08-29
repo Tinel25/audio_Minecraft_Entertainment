@@ -47,12 +47,20 @@
     button:hover {
       background-color: rgba(255, 255, 255, 0.4);
     }
+
+    #status {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Bienvenue au spectacle 🎧</h1>
     <button id="enableBtn">Activer le son</button>
+    <div id="status">🎬 Spectacle en cours</div>
   </div>
 
   <audio id="audio" src="spectacle.mp3" preload="auto"></audio>
@@ -73,21 +81,15 @@
 
     const audio = document.getElementById("audio");
     const enableBtn = document.getElementById("enableBtn");
+    const status = document.getElementById("status");
     let audioEnabled = false;
 
-    enableBtn.addEventListener("click", () => {
-      audioEnabled = true;
-      enableBtn.disabled = true;
-      enableBtn.textContent = "Son activé ✅";
-      alert("Le son est activé. Attendez le signal du staff.");
-    });
-
-    firebase.database().ref("show").on("value", (snapshot) => {
-      const data = snapshot.val();
+    function playAudioIfSignaled(data) {
       if (data && data.play && audioEnabled) {
         audio.currentTime = 0;
         audio.play().then(() => {
           console.log("Son lancé !");
+          status.style.display = "block";
           setTimeout(() => {
             firebase.database().ref("show").set({ play: false }).catch((error) => {
               console.error("Impossible de réinitialiser la valeur :", error);
@@ -97,6 +99,22 @@
           console.error("Impossible de jouer le son :", error);
         });
       }
+    }
+
+    enableBtn.addEventListener("click", () => {
+      audioEnabled = true;
+      enableBtn.disabled = true;
+      enableBtn.textContent = "Son activé ✅";
+      alert("Le son est activé. Attendez le signal du staff.");
+
+      // Vérifie si le signal est déjà actif
+      firebase.database().ref("show").once("value").then((snapshot) => {
+        playAudioIfSignaled(snapshot.val());
+      });
+    });
+
+    firebase.database().ref("show").on("value", (snapshot) => {
+      playAudioIfSignaled(snapshot.val());
     });
   </script>
 </body>
