@@ -27,6 +27,11 @@
       margin-top: 20px;
       font-size: 18px;
     }
+    #viewerCount {
+      margin-top: 15px;
+      font-size: 16px;
+      color: #ccc;
+    }
   </style>
 </head>
 <body>
@@ -34,6 +39,7 @@
   <button onclick="startShow()">🎧 Lancer le spectacle</button>
   <button onclick="resetShow()">🛑 Réinitialiser</button>
   <div id="progress">⏳ En attente du lancement...</div>
+  <div id="viewerCount">👥 Spectateurs connectés : 0</div>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -52,6 +58,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const progressDiv = document.getElementById("progress");
+    const viewerCountDiv = document.getElementById("viewerCount");
+
     let intervalId = null;
     let audioDuration = 180; // valeur par défaut
 
@@ -106,6 +114,7 @@
       }
     });
 
+    // Met à jour la progression selon le signal
     db.ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
       if (data && data.startTime) {
@@ -114,6 +123,13 @@
         progressDiv.textContent = "⏳ En attente du lancement...";
         clearInterval(intervalId);
       }
+    });
+
+    // Compteur de spectateurs connectés
+    db.ref("viewers").on("value", (snapshot) => {
+      const viewers = snapshot.val();
+      const count = viewers ? Object.keys(viewers).length : 0;
+      viewerCountDiv.textContent = `👥 Spectateurs connectés : ${count}`;
     });
   </script>
 </body>
