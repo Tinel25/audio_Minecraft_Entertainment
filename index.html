@@ -102,6 +102,13 @@
     let audioEnabled = false;
     let pendingStartTime = null;
 
+    // 🔴 Enregistre la présence du spectateur
+    const userId = Date.now().toString();
+    firebase.database().ref("viewers/" + userId).set(true);
+    window.addEventListener("beforeunload", () => {
+      firebase.database().ref("viewers/" + userId).remove();
+    });
+
     // Envoie automatique de la durée audio
     audio.addEventListener("loadedmetadata", () => {
       const duration = Math.floor(audio.duration);
