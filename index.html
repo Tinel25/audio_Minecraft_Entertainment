@@ -54,12 +54,27 @@
       font-weight: bold;
       display: none;
     }
+
+    #volumeSlider {
+      width: 200px;
+      margin-top: 20px;
+    }
+
+    label[for="volumeSlider"] {
+      display: block;
+      margin-top: 20px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Bienvenue au spectacle 🎧</h1>
     <button id="enableBtn">Activer le son</button>
+
+    <label for="volumeSlider">Volume 🎵</label>
+    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+
     <div id="status">🎬 Spectacle en cours</div>
   </div>
 
@@ -82,6 +97,8 @@
     const audio = document.getElementById("audio");
     const enableBtn = document.getElementById("enableBtn");
     const status = document.getElementById("status");
+    const volumeSlider = document.getElementById("volumeSlider");
+
     let audioEnabled = false;
     let pendingStartTime = null;
 
@@ -90,6 +107,11 @@
       const duration = Math.floor(audio.duration);
       firebase.database().ref("audioInfo").set({ duration });
       console.log("Durée audio envoyée :", duration, "secondes");
+    });
+
+    // Réglage du volume via le slider
+    volumeSlider.addEventListener("input", () => {
+      audio.volume = volumeSlider.value;
     });
 
     function playFromTimestamp(startTime) {
@@ -126,7 +148,7 @@
       audio.play().then(() => {
         audio.pause();
         audio.currentTime = 0;
-        audio.volume = 1;
+        audio.volume = volumeSlider.value;
 
         if (pendingStartTime) {
           playFromTimestamp(pendingStartTime);
