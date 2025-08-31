@@ -79,6 +79,7 @@
   </div>
 
   <audio id="audio" src="spectacle.mp3" preload="auto"></audio>
+  <audio id="waitingAudio" src="attente.mp3" loop preload="auto"></audio>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -95,6 +96,7 @@
     firebase.initializeApp(firebaseConfig);
 
     const audio = document.getElementById("audio");
+    const waitingAudio = document.getElementById("waitingAudio");
     const enableBtn = document.getElementById("enableBtn");
     const status = document.getElementById("status");
     const volumeSlider = document.getElementById("volumeSlider");
@@ -102,23 +104,21 @@
     let audioEnabled = false;
     let pendingStartTime = null;
 
-    // 🔴 Enregistre la présence du spectateur
     const userId = Date.now().toString();
     firebase.database().ref("viewers/" + userId).set(true);
     window.addEventListener("beforeunload", () => {
       firebase.database().ref("viewers/" + userId).remove();
     });
 
-    // Envoie automatique de la durée audio
     audio.addEventListener("loadedmetadata", () => {
       const duration = Math.floor(audio.duration);
       firebase.database().ref("audioInfo").set({ duration });
       console.log("Durée audio envoyée :", duration, "secondes");
     });
 
-    // Réglage du volume via le slider
     volumeSlider.addEventListener("input", () => {
       audio.volume = volumeSlider.value;
+      waitingAudio.volume = volumeSlider.value;
     });
 
     function playFromTimestamp(startTime) {
@@ -150,14 +150,18 @@
       enableBtn.textContent = "Son activé ✅";
       alert("Le son est activé. Attendez le signal du staff.");
 
-      // Lecture silencieuse pour autoriser le navigateur
       audio.volume = 0;
       audio.play().then(() => {
         audio.pause();
         audio.currentTime = 0;
         audio.volume = volumeSlider.value;
 
+        // Démarre la musique d'attente
+        waitingAudio.volume = volumeSlider.value;
+        waitingAudio.play();
+
         if (pendingStartTime) {
+          waitingAudio.pause();
           playFromTimestamp(pendingStartTime);
         }
       }).catch((error) => {
@@ -171,12 +175,18 @@
       if (data && data.startTime) {
         pendingStartTime = data.startTime;
         if (audioEnabled) {
+          waitingAudio.pause();
           playFromTimestamp(data.startTime);
         }
       } else {
         audio.pause();
         status.style.display = "none";
         console.log("Spectacle interrompu par le staff");
+
+        if (audioEnabled) {
+          waitingAudio.volume = volumeSlider.value;
+          waitingAudio.play();
+        }
       }
     });
   </script>
