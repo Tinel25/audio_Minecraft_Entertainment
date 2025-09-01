@@ -38,6 +38,7 @@
   <h1>Staff : Contrôle du spectacle 🎬</h1>
   <button onclick="startShow()">🎧 Lancer le spectacle</button>
   <button onclick="resetShow()">🛑 Réinitialiser</button>
+  <button onclick="resetViewers()">👤 Réinitialiser les spectateurs</button>
   <div id="progress">⏳ En attente du lancement...</div>
   <div id="viewerCount">👥 Spectateurs connectés : 0</div>
 
@@ -89,6 +90,18 @@
         });
     }
 
+    function resetViewers() {
+      db.ref("viewers").remove()
+        .then(() => {
+          alert("Nombre de spectateurs réinitialisé 👥");
+          viewerCountDiv.textContent = "👥 Spectateurs connectés : 0";
+        })
+        .catch((error) => {
+          console.error("Erreur lors de la réinitialisation des spectateurs :", error);
+          alert("Échec de la réinitialisation des spectateurs.");
+        });
+    }
+
     function updateProgress(startTime) {
       clearInterval(intervalId);
       intervalId = setInterval(() => {
@@ -105,7 +118,6 @@
       }, 1000);
     }
 
-    // Récupère la durée audio automatiquement
     db.ref("audioInfo/duration").on("value", (snapshot) => {
       const duration = snapshot.val();
       if (duration && !isNaN(duration)) {
@@ -114,7 +126,6 @@
       }
     });
 
-    // Met à jour la progression selon le signal
     db.ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
       if (data && data.startTime) {
@@ -125,7 +136,6 @@
       }
     });
 
-    // Compteur de spectateurs connectés
     db.ref("viewers").on("value", (snapshot) => {
       const viewers = snapshot.val();
       const count = viewers ? Object.keys(viewers).length : 0;
