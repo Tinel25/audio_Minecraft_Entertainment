@@ -65,6 +65,13 @@
       margin-top: 20px;
       font-size: 16px;
     }
+
+    .footer {
+      margin-top: auto;
+      padding: 10px;
+      font-size: 12px;
+      color: #ccc;
+    }
   </style>
 </head>
 <body>
@@ -80,6 +87,8 @@
 
   <audio id="audio" src="spectacle.mp3" preload="auto"></audio>
   <audio id="waitingAudio" src="attente.mp3" loop preload="auto"></audio>
+
+  <div class="footer">Tinel25</div>
 
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -156,7 +165,6 @@
         audio.currentTime = 0;
         audio.volume = volumeSlider.value;
 
-        // Démarre la musique d'attente
         waitingAudio.volume = volumeSlider.value;
         waitingAudio.play();
 
