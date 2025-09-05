@@ -39,6 +39,8 @@
   <button onclick="startShow()">🎧 Lancer le spectacle</button>
   <button onclick="resetShow()">🛑 Réinitialiser</button>
   <button onclick="resetViewers()">👤 Réinitialiser les spectateurs</button>
+  <button onclick="fadeOutWaitingAudio()">🔇 Couper la musique d’attente</button>
+
   <div id="progress">⏳ En attente du lancement...</div>
   <div id="viewerCount">👥 Spectateurs connectés : 0</div>
 
@@ -99,6 +101,21 @@
         .catch((error) => {
           console.error("Erreur lors de la réinitialisation des spectateurs :", error);
           alert("Échec de la réinitialisation des spectateurs.");
+        });
+    }
+
+    function fadeOutWaitingAudio() {
+      const fadeSignal = {
+        fadeOut: true,
+        timestamp: Date.now()
+      };
+      db.ref("fadeWaitingAudio").set(fadeSignal)
+        .then(() => {
+          alert("Signal de coupure envoyé 🔇");
+        })
+        .catch((error) => {
+          console.error("Erreur d'envoi du signal de coupure :", error);
+          alert("Échec de l'envoi du signal.");
         });
     }
 
