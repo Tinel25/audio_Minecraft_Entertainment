@@ -159,14 +159,11 @@
       enableBtn.textContent = "Son activé ✅";
       alert("Le son est activé. Attendez le signal du staff.");
 
-      // Lecture anticipée pour débloquer waitingAudio
       waitingAudio.volume = 0;
       waitingAudio.play().then(() => {
         waitingAudio.pause();
         waitingAudio.currentTime = 0;
         waitingAudio.volume = volumeSlider.value || 1;
-
-        // Lecture réelle immédiate de la musique d’attente
         waitingAudio.play().catch((error) => {
           console.error("Erreur lecture attente.mp3 :", error);
         });
@@ -174,14 +171,12 @@
         console.warn("Lecture anticipée refusée pour attente.mp3 :", error);
       });
 
-      // Lecture anticipée pour débloquer audio principal
       audio.volume = 0;
       audio.play().then(() => {
         audio.pause();
         audio.currentTime = 0;
         audio.volume = volumeSlider.value;
 
-        // Si le spectacle est déjà lancé, on le démarre
         if (pendingStartTime) {
           waitingAudio.pause();
           playFromTimestamp(pendingStartTime);
@@ -193,7 +188,6 @@
 
     firebase.database().ref("show").on("value", (snapshot) => {
       const data = snapshot.val();
-
       if (data && data.startTime) {
         pendingStartTime = data.startTime;
         if (audioEnabled) {
@@ -204,8 +198,27 @@
         audio.pause();
         status.style.display = "none";
         console.log("Spectacle interrompu par le staff");
+      }
+    });
 
-        // Ne relance pas la musique d’attente ici — elle est déjà gérée à l’activation
+    // 🔇 Réception du signal de fade-out
+    firebase.database().ref("fadeWaitingAudio").on("value", (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.fadeOut && audioEnabled) {
+        let volume = waitingAudio.volume;
+        const steps = 50;
+        const interval = 5000 / steps;
+        const decrement = volume / steps;
+
+        const fadeInterval = setInterval(() => {
+          volume = Math.max(0, volume - decrement);
+          waitingAudio.volume = volume;
+          if (volume <= 0) {
+            waitingAudio.pause();
+            clearInterval(fadeInterval);
+            console.log("Musique d’attente coupée progressivement.");
+          }
+        }, interval);
       }
     });
   </script>
