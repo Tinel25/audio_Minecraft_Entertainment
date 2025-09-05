@@ -165,8 +165,10 @@
         audio.currentTime = 0;
         audio.volume = volumeSlider.value;
 
-        waitingAudio.volume = volumeSlider.value;
-        waitingAudio.play();
+        waitingAudio.volume = volumeSlider.value || 1;
+        waitingAudio.play().catch((error) => {
+          console.error("Erreur lecture attente.mp3 :", error);
+        });
 
         if (pendingStartTime) {
           waitingAudio.pause();
@@ -192,7 +194,7 @@
         console.log("Spectacle interrompu par le staff");
 
         if (audioEnabled) {
-          waitingAudio.volume = volumeSlider.value;
+          waitingAudio.volume = volumeSlider.value || 1;
           waitingAudio.play();
         }
       }
