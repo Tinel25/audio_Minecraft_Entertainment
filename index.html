@@ -159,23 +159,34 @@
       enableBtn.textContent = "Son activé ✅";
       alert("Le son est activé. Attendez le signal du staff.");
 
+      // Lecture anticipée pour débloquer waitingAudio
+      waitingAudio.volume = 0;
+      waitingAudio.play().then(() => {
+        waitingAudio.pause();
+        waitingAudio.currentTime = 0;
+        waitingAudio.volume = volumeSlider.value || 1;
+
+        // Lecture réelle
+        waitingAudio.play().catch((error) => {
+          console.error("Erreur lecture attente.mp3 :", error);
+        });
+      }).catch((error) => {
+        console.warn("Lecture anticipée refusée pour attente.mp3 :", error);
+      });
+
+      // Lecture anticipée pour débloquer audio principal
       audio.volume = 0;
       audio.play().then(() => {
         audio.pause();
         audio.currentTime = 0;
         audio.volume = volumeSlider.value;
 
-        waitingAudio.volume = volumeSlider.value || 1;
-        waitingAudio.play().catch((error) => {
-          console.error("Erreur lecture attente.mp3 :", error);
-        });
-
         if (pendingStartTime) {
           waitingAudio.pause();
           playFromTimestamp(pendingStartTime);
         }
       }).catch((error) => {
-        console.warn("Lecture anticipée refusée :", error);
+        console.warn("Lecture anticipée refusée pour spectacle.mp3 :", error);
       });
     });
 
