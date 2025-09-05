@@ -166,7 +166,7 @@
         waitingAudio.currentTime = 0;
         waitingAudio.volume = volumeSlider.value || 1;
 
-        // Lecture réelle
+        // Lecture réelle immédiate de la musique d’attente
         waitingAudio.play().catch((error) => {
           console.error("Erreur lecture attente.mp3 :", error);
         });
@@ -181,6 +181,7 @@
         audio.currentTime = 0;
         audio.volume = volumeSlider.value;
 
+        // Si le spectacle est déjà lancé, on le démarre
         if (pendingStartTime) {
           waitingAudio.pause();
           playFromTimestamp(pendingStartTime);
@@ -204,10 +205,7 @@
         status.style.display = "none";
         console.log("Spectacle interrompu par le staff");
 
-        if (audioEnabled) {
-          waitingAudio.volume = volumeSlider.value || 1;
-          waitingAudio.play();
-        }
+        // Ne relance pas la musique d’attente ici — elle est déjà gérée à l’activation
       }
     });
   </script>
