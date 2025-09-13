@@ -149,6 +149,12 @@
 
     enableBtn.addEventListener("click", () => {
       audioEnabled = true;
+
+      // 🔊 Réglage automatique du volume à 15 %
+      volumeSlider.value = 0.15;
+      audio.volume = 0.15;
+      waitingAudio.volume = 0.15;
+
       enableBtn.disabled = true;
       enableBtn.textContent = "Son activé ✅";
       alert("Le son est activé. Attendez le signal du staff.");
