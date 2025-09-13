@@ -85,7 +85,7 @@
     <div id="status">🎬 Spectacle en cours</div>
   </div>
 
-  <audio id="audio" src="spectacle.mp3" preload="auto"></audio>
+  <audio id="audio" preload="auto"></audio>
   <audio id="waitingAudio" src="attente.mp3" loop preload="auto"></audio>
 
   <div class="footer">Tinel25</div>
@@ -117,12 +117,6 @@
     firebase.database().ref("viewers/" + userId).set(true);
     window.addEventListener("beforeunload", () => {
       firebase.database().ref("viewers/" + userId).remove();
-    });
-
-    audio.addEventListener("loadedmetadata", () => {
-      const duration = Math.floor(audio.duration);
-      firebase.database().ref("audioInfo").set({ duration });
-      console.log("Durée audio envoyée :", duration, "secondes");
     });
 
     volumeSlider.addEventListener("input", () => {
@@ -182,7 +176,7 @@
           playFromTimestamp(pendingStartTime);
         }
       }).catch((error) => {
-        console.warn("Lecture anticipée refusée pour spectacle.mp3 :", error);
+        console.warn("Lecture anticipée refusée pour le spectacle :", error);
       });
     });
 
@@ -190,6 +184,12 @@
       const data = snapshot.val();
       if (data && data.startTime) {
         pendingStartTime = data.startTime;
+
+        if (data.audioFile) {
+          audio.src = data.audioFile;
+          console.log("Fichier audio reçu :", data.audioFile);
+        }
+
         if (audioEnabled) {
           waitingAudio.pause();
           playFromTimestamp(data.startTime);
@@ -201,7 +201,6 @@
       }
     });
 
-    // 🔇 Réception du signal de fade-out
     firebase.database().ref("fadeWaitingAudio").on("value", (snapshot) => {
       const data = snapshot.val();
       if (data && data.fadeOut && audioEnabled) {
