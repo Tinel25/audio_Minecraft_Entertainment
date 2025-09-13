@@ -23,13 +23,20 @@
     button:hover {
       background-color: #666;
     }
-    #progress {
+    select {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background-color: #222;
+      color: white;
+    }
+    #progress, #viewerCount, #currentAudio {
       margin-top: 20px;
       font-size: 18px;
     }
     #viewerCount {
-      margin-top: 15px;
-      font-size: 16px;
       color: #ccc;
     }
     #authOverlay {
@@ -69,6 +76,14 @@
   </div>
 
   <h1>Staff : Contrôle du spectacle 🎬</h1>
+
+  <label for="spectacleSelect">🎭 Choisissez un spectacle :</label>
+  <select id="spectacleSelect">
+    <option value="spectacle.mp3">Alice & La Reine de Coeur</option>
+    <option value="Là-Haut.mp3">Là-Haut</option>
+  </select>
+
+  <br><br>
   <button onclick="startShow()">🎧 Lancer le spectacle</button>
   <button onclick="resetShow()">🛑 Réinitialiser</button>
   <button onclick="resetViewers()">👤 Réinitialiser les spectateurs</button>
@@ -76,6 +91,7 @@
 
   <div id="progress">⏳ En attente du lancement...</div>
   <div id="viewerCount">👥 Spectateurs connectés : 0</div>
+  <div id="currentAudio">🎵 Audio en cours : Aucun</div>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -105,21 +121,27 @@
     const db = firebase.database();
     const progressDiv = document.getElementById("progress");
     const viewerCountDiv = document.getElementById("viewerCount");
+    const currentAudioDiv = document.getElementById("currentAudio");
 
     let intervalId = null;
     let audioDuration = 180;
 
     function startShow() {
       const timestamp = Date.now();
-      db.ref("show").set({ startTime: timestamp })
-        .then(() => {
-          alert("Signal envoyé 🎉");
-          updateProgress(timestamp);
-        })
-        .catch((error) => {
-          console.error("Erreur d'envoi du signal :", error);
-          alert("Échec de l'envoi du signal.");
-        });
+      const selectedAudio = document.getElementById("spectacleSelect").value;
+
+      db.ref("show").set({
+        startTime: timestamp,
+        audioFile: selectedAudio
+      })
+      .then(() => {
+        alert(`Spectacle lancé 🎉\nAudio : ${selectedAudio}`);
+        updateProgress(timestamp);
+      })
+      .catch((error) => {
+        console.error("Erreur d'envoi du signal :", error);
+        alert("Échec de l'envoi du signal.");
+      });
     }
 
     function resetShow() {
@@ -127,6 +149,7 @@
         .then(() => {
           alert("Spectacle réinitialisé 🧹");
           progressDiv.textContent = "⏳ En attente du lancement...";
+          currentAudioDiv.textContent = "🎵 Audio en cours : Aucun";
           clearInterval(intervalId);
         })
         .catch((error) => {
@@ -190,8 +213,10 @@
       const data = snapshot.val();
       if (data && data.startTime) {
         updateProgress(data.startTime);
+        currentAudioDiv.textContent = `🎵 Audio en cours : ${data.audioFile || "Inconnu"}`;
       } else {
         progressDiv.textContent = "⏳ En attente du lancement...";
+        currentAudioDiv.textContent = "🎵 Audio en cours : Aucun";
         clearInterval(intervalId);
       }
     });
