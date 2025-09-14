@@ -10,7 +10,7 @@
       text-align: center;
       padding-top: 50px;
     }
-    button {
+    button, select {
       margin: 10px;
       padding: 12px 24px;
       font-size: 16px;
@@ -20,17 +20,8 @@
       background-color: #444;
       color: white;
     }
-    button:hover {
+    button:hover, select:hover {
       background-color: #666;
-    }
-    select {
-      margin: 10px;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: none;
-      background-color: #222;
-      color: white;
     }
     #progress, #viewerCount, #currentAudio {
       margin-top: 20px;
@@ -76,6 +67,12 @@
   </div>
 
   <h1>Staff : Contrôle du spectacle 🎬</h1>
+
+  <label for="targetPage">📍 Cible du spectacle :</label>
+  <select id="targetPage">
+    <option value="guest">Page Spectateurs</option>
+    <option value="audiostaff">Page Audio Staff</option>
+  </select>
 
   <label for="spectacleSelect">🎭 Choisissez un spectacle :</label>
   <select id="spectacleSelect">
@@ -136,12 +133,14 @@
     function startShow() {
       const timestamp = Date.now();
       const selectedAudio = document.getElementById("spectacleSelect").value;
+      const target = document.getElementById("targetPage").value;
 
-      alert(`Spectacle lancé 🎉\nAudio : ${selectedAudio}`);
+      alert(`Spectacle lancé 🎉\nAudio : ${selectedAudio}\nCible : ${target}`);
 
       db.ref("show").set({
         startTime: timestamp,
-        audioFile: selectedAudio
+        audioFile: selectedAudio,
+        targetPage: target
       })
       .then(() => {
         updateProgress(timestamp);
@@ -221,7 +220,7 @@
       const data = snapshot.val();
       if (data && data.startTime) {
         updateProgress(data.startTime);
-        currentAudioDiv.textContent = `🎵 Audio en cours : ${data.audioFile || "Inconnu"}`;
+        currentAudioDiv.textContent = `🎵 Audio en cours : ${data.audioFile || "Inconnu"} (cible : ${data.targetPage || "toutes"})`;
       } else {
         progressDiv.textContent = "⏳ En attente du lancement...";
         currentAudioDiv.textContent = "🎵 Audio en cours : Aucun";
